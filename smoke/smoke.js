@@ -3,6 +3,8 @@
 var smoke = {
   smoketimeout: 	[],
   signaltimeout: 	3000,
+  defaultAnimationIn:	'bounceIn',
+  defaultAnimationOut: 	'bounceOut',
   init: 		false,
   zindex: 		100,
   i: 			0,
@@ -11,7 +13,7 @@ var smoke = {
 		var ff = document.createElement('div');
 				ff.setAttribute('id','smoke-out-'+id);
 /*				ff.setAttribute('class','smoke-base'); */
-				ff.className = 'smoke-base';
+				ff.className = 'smoke-base animated';
 				ff.style.zIndex = smoke.zindex;
 				smoke.zindex++;
 				document.body.appendChild(ff);
@@ -92,7 +94,7 @@ var smoke = {
 
 		box = 
 			'<div id="smoke-bg-'+f.newid+'" class="smokebg"></div>'+
-			'<div class="dialog smoke '+classname+'">'+
+			'<div class="dialog animated smoke '+classname+'">'+
 				'<div class="dialog-inner">'+
 						e+
 						prompt+
@@ -114,8 +116,10 @@ var smoke = {
 	
 		var ff = document.getElementById('smoke-out-'+f.newid);
 
-		ff.className = 'smoke-base smoke-visible  smoke-' + f.type;
+		ff.className = 'smoke-base animated smoke-visible smoke-' + f.type;
 		ff.innerHTML = box;
+
+		ff.querySelector('.dialog').className += (typeof f.params.animation !== 'undefined') ? ' ' + f.params.animation.in : this.defaultAnimationIn;
 				
 		while (ff.innerHTML === ""){
 			ff.innerHTML = box;
@@ -132,7 +136,7 @@ var smoke = {
 			document.getElementById('smoke-bg-'+f.newid),
 			"click", 
 			function () {
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				if (f.type === 'prompt' || f.type === 'confirm'){
 					f.callback(false);
 				} else if (f.type === 'alert' && typeof f.callback !== 'undefined') {
@@ -167,7 +171,7 @@ var smoke = {
 			document.getElementById('alert-ok-'+f.newid),
 			"click", 
 			function () {
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				if (typeof f.callback !== 'undefined') {
 					f.callback();
 				}
@@ -180,7 +184,7 @@ var smoke = {
 				e = window.event;
 			}
 			if (e.keyCode === 13 || e.keyCode === 32 || e.keyCode === 27){
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				if (typeof f.callback !== 'undefined') {
 					f.callback();
 				}					
@@ -195,7 +199,7 @@ var smoke = {
 			"click", 
 			function () 
 			{
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(false);
 			}
 		);
@@ -205,7 +209,7 @@ var smoke = {
 			"click", 
 			function () 
 			{
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(true);
 			}
 		);
@@ -216,10 +220,10 @@ var smoke = {
 				e = window.event;
 			}
 			if (e.keyCode === 13 || e.keyCode === 32){
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(true);
 			} else if (e.keyCode === 27){
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(false);
 			}
 		};	
@@ -239,7 +243,7 @@ var smoke = {
 			document.getElementById('prompt-cancel-'+f.newid),
 			"click", 
 			function () {
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(false);
 			}
 		);
@@ -249,7 +253,7 @@ var smoke = {
 			document.getElementById('prompt-ok-'+f.newid),
 			"click", 
 			function () {
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(pi.value);
 			}
 		);
@@ -261,10 +265,10 @@ var smoke = {
 			}
 			
 			if (e.keyCode === 13){
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(pi.value);
 			} else if (e.keyCode === 27){
-				smoke.destroy(f.type, f.newid);
+				smoke.animateOut(f);
 				f.callback(false);
 			}
 		};
@@ -273,18 +277,27 @@ var smoke = {
 	finishbuildSignal: function (e, f, box)
 	{
 		smoke.smoketimeout[f.newid] = setTimeout(function () {
-			smoke.destroy(f.type, f.newid);
+			smoke.animateOut(f);
 		}, f.params.timeout || this.signaltimeout);
 	},
-	
+
+	animateOut: function (f) {
+		var smokeChild = document.getElementById('smoke-out-'+f.newid);
+		smokeChild.querySelector('.dialog').className = 
+			(typeof f.params.animation !== 'undefined') ? 'dialog animated smoke ' + f.params.animation.in : 'dialog animated smoke ' + this.defaultAnimationOut;
+		smokeChild.className += ' fadeOut';
+
+		smoke.smoketimeout[f.newid] = setTimeout(function () {
+			smoke.destroy(f.type, f.newid);
+		}, 2000);	
+	},
 			
 	destroy: function (type,id) {
-		var box = document.getElementById('smoke-out-'+id), 
+		var box 	 = document.getElementById('smoke-out-'+id);
 		    okButton     = document.getElementById(type+'-ok-'+id), 
 		    cancelButton = document.getElementById(type+'-cancel-'+id);
 /*				box.setAttribute('class','smoke-base'); */
-		box.className = 'smoke-base';
-
+		
 			
 		// confirm/alert/prompt remove click listener
 		if (okButton){
@@ -298,6 +311,7 @@ var smoke = {
 		}
 		
 		smoke.i = 0;
+		box.className = 'smoke-base animated';
 		box.innerHTML = '';
 	},
 
