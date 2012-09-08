@@ -1,3 +1,7 @@
+CHANGES IN THIS FORK:
+- This enables animate.css to control the in and out animations of smoke.js
+
+
 Notify or get approval from your users quickly and with style. This alert system uses css animations and background (so there are no images or js animation code...so it's really lightweight).
 
 It's easy to implement and really easy to change the style.
