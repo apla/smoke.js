@@ -8,8 +8,14 @@ var smoke = {
   i: 			0,
 
 	bodyload: function(id){
+		var tt = document.createElement('div');
+		tt.setAttribute('ongesturestart', 'return;');
+		if (typeof tt.ongesturestart == "function"){
+			smoke.touchScreen = true;
+		}
 		var ff = document.createElement('div');
 				ff.setAttribute('id','smoke-out-'+id);
+
 /*				ff.setAttribute('class','smoke-base'); */
 				ff.className = 'smoke-base';
 				ff.style.zIndex = smoke.zindex;
@@ -128,7 +134,7 @@ var smoke = {
 
 		// close on background click
 		// buberdds got rid of this for ie support?
-		smoke.listen(
+		if (!smoke.touchScreen) smoke.listen(
 			document.getElementById('smoke-bg-'+f.newid),
 			"click", 
 			function () {
@@ -233,6 +239,9 @@ var smoke = {
 			pi.focus();
 			pi.select();
 		}, 100);
+		
+		if (f.params.onfocus) smoke.listen (pi, "focus", f.params.onfocus);
+		if (f.params.onblur)  smoke.listen (pi, "blur",  f.params.onblur);
 	
 		// events for cancel button
 		smoke.listen(
